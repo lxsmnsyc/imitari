@@ -1,0 +1,7 @@
+packages:
+  - packages/**/*
+  - benchmark
+onlyBuiltDependencies:
+  - '@biomejs/biome'
+  - esbuild
+  - nx

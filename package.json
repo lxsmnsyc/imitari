@@ -1,0 +1,10 @@
+{
+  "name": "root",
+  "private": true,
+  "workspaces": ["packages/*", "benchmark"],
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "lerna": "^8.2.2",
+    "typescript": "^5.8.3"
+  }
+}
