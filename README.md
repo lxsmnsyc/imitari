@@ -1,6 +1,6 @@
 # imitari
 
-> Stringify JS values
+> Image component
 
 [![NPM](https://img.shields.io/npm/v/imitari.svg)](https://www.npmjs.com/package/imitari) [![JavaScript Style Guide](https://badgen.net/badge/code%20style/airbnb/ff5a5f?icon=airbnb)](https://github.com/airbnb/javascript)
 
@@ -20,9 +20,7 @@ pnpm add imitari
 
 ## Docs
 
-- [Serialization](https://github.com/lxsmnsyc/imitari/blob/main/docs/serialization.md)
-- [Compatibility](https://github.com/lxsmnsyc/imitari/blob/main/docs/compatibility.md)
-- [Isomorphic References](https://github.com/lxsmnsyc/imitari/blob/main/docs/isomorphic-refs.md)
+TODO
 
 ## Sponsors
 
