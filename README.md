@@ -18,9 +18,24 @@ yarn add imitari
 pnpm add imitari
 ```
 
-## Docs
+## Usage
 
-TODO
+```js
+import { Imitari } from 'imitari';
+import * as myImage from './path/to/image.png?imitari';
+
+export function MyComponent() {
+  return (
+    <Imitari src={myImage.source} width={myImage.width} height={myImage.height}>
+      {(show, onLoad) => (
+        <Show when={show()}>
+          <Skeleton onLoad={onLoad} />
+        </Show>
+      )}
+    </Imitari>
+  );
+}
+```
 
 ## Sponsors
 
