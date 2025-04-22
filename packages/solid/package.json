@@ -1,0 +1,65 @@
+{
+  "name": "solid-imitari",
+  "type": "module",
+  "private": false,
+  "description": "Responsive images",
+  "repository": {
+    "url": "https://github.com/lxsmnsyc/imitari.git",
+    "type": "git"
+  },
+  "homepage": "https://github.com/lxsmnsyc/imitari/tree/main/packages/solid",
+  "bugs": {
+    "url": "https://github.com/lxsmnsyc/imitari/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "Alexis Munsayac",
+  "scripts": {
+    "prepublishOnly": "pridepack clean && pridepack build",
+    "build": "pridepack build",
+    "type-check": "pridepack check",
+    "clean": "pridepack clean",
+    "watch": "pridepack watch",
+    "start": "pridepack start",
+    "dev": "pridepack dev",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "version": "0.0.0",
+  "files": ["dist", "src"],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "keywords": ["pridepack"],
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "@vitest/ui": "^3.1.2",
+    "pridepack": "2.6.4",
+    "solid-js": "^1.9.5",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.2"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.2"
+  },
+  "types": "./dist/types/index.d.ts",
+  "main": "./dist/cjs/production/index.cjs",
+  "module": "./dist/esm/production/index.mjs",
+  "exports": {
+    ".": {
+      "development": {
+        "require": "./dist/cjs/development/index.cjs",
+        "import": "./dist/esm/development/index.mjs"
+      },
+      "require": "./dist/cjs/production/index.cjs",
+      "import": "./dist/esm/production/index.mjs",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {}
+  }
+}
