@@ -16,12 +16,17 @@
   },
   "author": "Alexis Munsayac",
   "version": "0.0.0",
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "engines": {
     "node": ">=18"
   },
   "license": "MIT",
-  "keywords": ["pridepack"],
+  "keywords": [
+    "pridepack"
+  ],
   "devDependencies": {
     "@types/node": "^22.14.1",
     "@vitest/ui": "^3.1.2",
@@ -30,8 +35,8 @@
     "solid-js": "^1.9.5",
     "tslib": "^2.8.1",
     "typescript": "^5.8.3",
-    "vitest": "^3.1.2",
-    "vite": "^6.3.2"
+    "vite": "^6.3.2",
+    "vitest": "^3.1.2"
   },
   "peerDependencies": {
     "rollup": ">=3",
@@ -64,5 +69,9 @@
   },
   "typesVersions": {
     "*": {}
+  },
+  "dependencies": {
+    "sharp": "^0.34.1",
+    "unplugin": "^2.3.2"
   }
 }
