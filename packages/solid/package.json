@@ -27,12 +27,17 @@
     "test:ui": "vitest --ui"
   },
   "version": "0.0.0",
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "engines": {
     "node": ">=18"
   },
   "license": "MIT",
-  "keywords": ["pridepack"],
+  "keywords": [
+    "pridepack"
+  ],
   "devDependencies": {
     "@types/node": "^22.14.1",
     "@vitest/ui": "^3.1.2",
@@ -46,17 +51,17 @@
     "solid-js": "^1.2"
   },
   "types": "./dist/types/index.d.ts",
-  "main": "./dist/cjs/production/index.cjs",
-  "module": "./dist/esm/production/index.mjs",
+  "main": "./dist/cjs/production/index.jsx",
+  "module": "./dist/esm/production/index.jsx",
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "development": {
-        "require": "./dist/cjs/development/index.cjs",
-        "import": "./dist/esm/development/index.mjs"
+        "require": "./dist/cjs/development/index.jsx",
+        "import": "./dist/esm/development/index.jsx"
       },
-      "require": "./dist/cjs/production/index.cjs",
-      "import": "./dist/esm/production/index.mjs",
-      "types": "./dist/types/index.d.ts"
+      "require": "./dist/cjs/production/index.jsx",
+      "import": "./dist/esm/production/index.jsx"
     }
   },
   "typesVersions": {

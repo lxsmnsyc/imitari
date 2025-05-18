@@ -7,7 +7,6 @@ import {
   IMAGE_CONTAINER,
   IMAGE_STYLE,
   getAspectRatioBoxStyle,
-  getEmptyImageURL,
 } from './utils';
 
 export type ImitariMIME =
@@ -179,7 +178,7 @@ export function Imitari<T>(props: ImitariProps<T>): JSX.Element {
           height: height(),
         })}
       >
-        <picture>
+        <picture style={IMAGE_STYLE}>
           <ImitariSources {...props} />
           <ClientOnly
             fallback={
@@ -196,10 +195,10 @@ export function Imitari<T>(props: ImitariProps<T>): JSX.Element {
             <Show when={laze.visible}>
               <img
                 data-imitari="image"
-                src={getEmptyImageURL({
-                  width: width(),
-                  height: height(),
-                })}
+                // src={getEmptyImageURL({
+                //   width: width(),
+                //   height: height(),
+                // })}
                 alt={props.alt}
                 onLoad={() => {
                   if (!defer()) {
@@ -208,7 +207,6 @@ export function Imitari<T>(props: ImitariProps<T>): JSX.Element {
                   }
                 }}
                 style={{
-                  ...IMAGE_STYLE,
                   opacity: showPlaceholder() ? 0 : 1,
                 }}
                 crossOrigin={props.crossOrigin}
@@ -216,9 +214,13 @@ export function Imitari<T>(props: ImitariProps<T>): JSX.Element {
                 decoding={props.decoding}
               />
             </Show>
-            {props.children(showPlaceholder, onPlaceholderLoad)}
           </ClientOnly>
         </picture>
+        <ClientOnly>
+          <Show when={laze.visible}>
+            {props.children(showPlaceholder, onPlaceholderLoad)}
+          </Show>
+        </ClientOnly>
       </div>
       <div style={BLOCKER_STYLE} />
     </div>

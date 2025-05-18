@@ -37,6 +37,8 @@ export const IMAGE_CONTAINER: JSX.CSSProperties = {
 };
 
 export const IMAGE_STYLE: JSX.CSSProperties = {
+  position: 'absolute',
+  top: 0,
   width: '100%',
   height: '100%',
   'object-fit': 'contain',

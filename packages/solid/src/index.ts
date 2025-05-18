@@ -1,1 +1,1 @@
-export { Imitari, type ImitariProps } from './Imitari';
+export * from './Imitari';
