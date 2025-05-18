@@ -1,0 +1,23 @@
+{
+  "name": "vite-solid-imitari",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^6.3.5",
+    "vite-plugin-solid": "^2.11.6"
+  },
+  "dependencies": {
+    "solid-imitari": "0.0.0",
+    "solid-js": "^1.9.7"
+  },
+  "private": true,
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

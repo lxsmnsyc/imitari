@@ -1,7 +1,7 @@
 {
   "name": "root",
   "private": true,
-  "workspaces": ["packages/*", "benchmark"],
+  "workspaces": ["packages/*", "examples/*"],
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "lerna": "^8.2.2",
