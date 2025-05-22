@@ -3,6 +3,7 @@ import {
   type ImitariImageSource,
   type ImitariImageVariant,
   type ImitariMIME,
+  type ImitariTransformer,
 } from 'solid-imitari';
 import { type JSX, Show, onMount } from 'solid-js';
 
@@ -47,9 +48,15 @@ function Placeholder(props: PlaceholderProps): JSX.Element {
 }
 
 const source: ImitariImageSource = {
-  source: generateSources(BASE_URL, [400, 800, 1200], ['png', 'jpeg']),
+  source: BASE_URL,
   width: 2448,
   height: 3264,
+};
+
+const transformer: ImitariTransformer = {
+  transform(source) {
+    return generateSources(source.source, [400, 800, 1200], ['png', 'jpeg']);
+  },
 };
 
 export function Example(): JSX.Element {

@@ -25,22 +25,20 @@ export interface ImitariImageVariant {
 }
 
 export interface ImitariImageSource {
-  source: ImitariImageVariant | ImitariImageVariant[];
+  source: string;
   width: number;
   height: number;
 }
 
-export interface Transformer {
+export interface ImitariTransformer {
   transform: (
     source: ImitariImageSource,
-    data: ImitariImageVariant,
   ) => ImitariImageVariant | ImitariImageVariant[];
 }
 
-export interface TransformerWithOptions<T> {
+export interface ImitariTransformerWithOptions<T> {
   transform: (
     source: ImitariImageSource,
-    data: ImitariImageVariant,
     options: T,
   ) => ImitariImageVariant | ImitariImageVariant[];
   options: T;
@@ -53,35 +51,14 @@ function ensureArray<T>(value: T | T[]): T[] {
   return [value];
 }
 
-function transformVariant<T>(
+function createVariants<T>(
   source: ImitariImageSource,
-  transformer: Transformer | TransformerWithOptions<T>,
-  variant: ImitariImageVariant,
+  transformer: ImitariTransformer | ImitariTransformerWithOptions<T>,
 ): ImitariImageVariant[] {
   if ('options' in transformer) {
-    return ensureArray(
-      transformer.transform(source, variant, transformer.options),
-    );
+    return ensureArray(transformer.transform(source, transformer.options));
   }
-  return ensureArray(transformer.transform(source, variant));
-}
-
-function transformVariants<T>(
-  source: ImitariImageSource,
-  transformer: Transformer | TransformerWithOptions<T>,
-  variants: ImitariImageVariant | ImitariImageVariant[],
-): ImitariImageVariant[] {
-  if (Array.isArray(variants)) {
-    const result: ImitariImageVariant[] = [];
-    for (let i = 0, len = variants.length; i < len; i++) {
-      result.push.apply(
-        result,
-        transformVariant(source, transformer, variants[i]),
-      );
-    }
-    return result;
-  }
-  return ensureArray(transformVariant(source, transformer, variants));
+  return ensureArray(transformer.transform(source));
 }
 
 function variantToSrcSetPart(variant: ImitariImageVariant): string {
@@ -127,19 +104,16 @@ export interface ImitariBaseProps {
 }
 
 export interface ImitariProps<T> extends ImitariBaseProps {
-  transformer?: Transformer | TransformerWithOptions<T>;
+  transformer?: ImitariTransformer | ImitariTransformerWithOptions<T>;
 }
 
-function ImitariSources<T>(props: ImitariProps<T>): JSX.Element {
-  const variants = createMemo(() => {
-    if (props.transformer) {
-      return transformVariants(props.src, props.transformer, props.src.source);
-    }
-    return ensureArray(props.src.source);
-  });
+interface ImitariSourcesProps<T> extends ImitariProps<T> {
+  variants: ImitariImageVariant[];
+}
 
+function ImitariSources<T>(props: ImitariSourcesProps<T>): JSX.Element {
   const mergedVariants = createMemo(() => {
-    const types = mergeVariantsByType(variants());
+    const types = mergeVariantsByType(props.variants);
 
     const values: [type: string, srcset: string][] = [];
 
@@ -179,7 +153,17 @@ export function Imitari<T>(props: ImitariProps<T>): JSX.Element {
         })}
       >
         <picture style={IMAGE_STYLE}>
-          <ImitariSources {...props} />
+          <Show
+            when={props.transformer}
+            fallback={<source src={props.src.source} />}
+          >
+            {cb => (
+              <ImitariSources
+                variants={createVariants(props.src, cb())}
+                {...props}
+              />
+            )}
+          </Show>
           <ClientOnly
             fallback={
               <img
@@ -216,13 +200,14 @@ export function Imitari<T>(props: ImitariProps<T>): JSX.Element {
             </Show>
           </ClientOnly>
         </picture>
+      </div>
+      <div style={BLOCKER_STYLE}>
         <ClientOnly>
           <Show when={laze.visible}>
             {props.children(showPlaceholder, onPlaceholderLoad)}
           </Show>
         </ClientOnly>
       </div>
-      <div style={BLOCKER_STYLE} />
     </div>
   );
 }

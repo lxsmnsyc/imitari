@@ -36,22 +36,21 @@ export const IMAGE_CONTAINER: JSX.CSSProperties = {
   position: 'relative',
 };
 
-export const IMAGE_STYLE: JSX.CSSProperties = {
-  position: 'absolute',
-  top: 0,
-  width: '100%',
-  height: '100%',
-  'object-fit': 'contain',
-  'pointer-events': 'none',
-  'user-select': 'none',
-};
-
 export const BLOCKER_STYLE: JSX.CSSProperties = {
   position: 'absolute',
   top: 0,
   left: 0,
   right: 0,
   bottom: 0,
+};
+
+export const IMAGE_STYLE: JSX.CSSProperties = {
+  ...BLOCKER_STYLE,
+  width: '100%',
+  height: '100%',
+  'object-fit': 'contain',
+  'pointer-events': 'none',
+  'user-select': 'none',
 };
 
 export function getEmptySVGPlaceholder({ width, height }: AspectRatio): string {
