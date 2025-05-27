@@ -1,0 +1,67 @@
+{
+  "name": "imitari",
+  "type": "module",
+  "version": "0.0.0",
+  "private": false,
+  "description": "Responsive images",
+  "repository": {
+    "url": "https://github.com/lxsmnsyc/imitari.git",
+    "type": "git"
+  },
+  "homepage": "https://github.com/lxsmnsyc/imitari/tree/main/packages/imitari",
+  "bugs": {
+    "url": "https://github.com/lxsmnsyc/imitari/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "Alexis Munsayac",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "keywords": [
+    "pridepack"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "@vitest/ui": "^3.1.2",
+    "pridepack": "2.6.4",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.2"
+  },
+  "scripts": {
+    "prepublishOnly": "pridepack clean && pridepack build",
+    "build": "pridepack build",
+    "type-check": "pridepack check",
+    "clean": "pridepack clean",
+    "watch": "pridepack watch",
+    "start": "pridepack start",
+    "dev": "pridepack dev",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "types": "./dist/types/index.d.ts",
+  "main": "./dist/cjs/production/index.cjs",
+  "module": "./dist/esm/production/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "development": {
+        "require": "./dist/cjs/development/index.cjs",
+        "import": "./dist/esm/development/index.mjs"
+      },
+      "require": "./dist/cjs/production/index.cjs",
+      "import": "./dist/esm/production/index.mjs"
+    }
+  },
+  "typesVersions": {
+    "*": {}
+  },
+  "dependencies": {}
+}
