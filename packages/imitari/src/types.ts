@@ -4,39 +4,31 @@
  * Based on https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Image_types
  */
 export type ImitariMIME =
-  | 'image/apng'
   | 'image/avif'
-  | 'image/gif'
   | 'image/jpeg'
   | 'image/png'
-  | 'image/svg+xml'
-  | 'image/webp';
+  | 'image/webp'
+  | 'image/tiff';
 
 export type ImitariPNG = 'png';
-export type ImitariAPNG = 'apng' | ImitariPNG;
 export type ImitariAVIF = 'avif';
-export type ImitariGIF = 'gif';
 export type ImitariJPEG = 'jpg' | 'jpeg' | 'jfif' | 'pjpeg' | 'pjp';
-export type ImitariSVG = 'svg';
 export type ImitariWebP = 'webp';
+export type ImitariTIFF = 'tiff' | 'tif';
 
 export type ImitariFile =
-  | ImitariAPNG
   | ImitariAVIF
-  | ImitariGIF
   | ImitariJPEG
   | ImitariPNG
-  | ImitariSVG
-  | ImitariWebP;
+  | ImitariWebP
+  | ImitariTIFF;
 
 export type ImitariFormat =
-  | 'apng'
   | 'avif'
-  | 'gif'
   | 'jpeg'
   | 'png'
-  | 'svg'
-  | 'webp';
+  | 'webp'
+  | 'tiff';
 
 /**
  * A variant of an image source. This is used to transform a given source string

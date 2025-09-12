@@ -1,73 +1,13 @@
 import type { ImitariFile, ImitariFormat, ImitariImageVariant } from 'imitari';
 import {
   getFilesFromFormat,
-  getFormatFromFile,
   getMIMEFromFormat,
+  getOutputFileFromFormat,
 } from 'imitari';
-import fs from 'node:fs';
 import path from 'node:path';
-import sharp from 'sharp';
 import { type UnpluginOptions, createUnplugin } from 'unplugin';
-
-interface ImageData {
-  width: number;
-  height: number;
-  data: Uint8ClampedArray;
-}
-
-async function getImageDataFromPNG(stream: fs.ReadStream): Promise<ImageData> {
-  const result = await stream
-    .pipe(sharp().png())
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  return {
-    width: result.info.width,
-    height: result.info.height,
-    data: result.data as unknown as Uint8ClampedArray,
-  };
-}
-
-async function getImageDataFromFile(originalPath: string): Promise<ImageData> {
-  const stream = fs.createReadStream(originalPath);
-  if (originalPath.endsWith('.png')) {
-    const result = await stream
-      .pipe(sharp().png())
-      .ensureAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-    return {
-      width: result.info.width,
-      height: result.info.height,
-      data: result.data as unknown as Uint8ClampedArray,
-    };
-  }
-  if (originalPath.endsWith('.webp')) {
-    const result = await stream
-      .pipe(sharp().webp())
-      .ensureAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-    return {
-      width: result.info.width,
-      height: result.info.height,
-      data: result.data as unknown as Uint8ClampedArray,
-    };
-  }
-  if (originalPath.endsWith('.jpg')) {
-    const result = await stream
-      .pipe(sharp().jpeg())
-      .ensureAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-    return {
-      width: result.info.width,
-      height: result.info.height,
-      data: result.data as unknown as Uint8ClampedArray,
-    };
-  }
-  throw new Error('unsupported format');
-}
+import { getImageData, transformImage } from './transformers';
+import xxHash32 from './xxhash';
 
 const DEFAULT_INPUT: ImitariFormat[] = ['png', 'jpeg', 'webp'];
 const DEFAULT_OUTPUT: ImitariFormat[] = ['png', 'jpeg', 'webp'];
@@ -79,6 +19,8 @@ export interface ImitariOptions {
     input?: ImitariFormat[];
     output?: ImitariFormat[];
     quality: number;
+    publicPath?: string;
+    outputPath: string;
   };
   remote?: {
     transformURL(url: string): ImitariImageVariant | ImitariImageVariant[];
@@ -95,13 +37,6 @@ function getValidFileExtensions(formats: ImitariFormat[]): Set<string> {
   return result;
 }
 
-function getOutputFileExtensions(formats: ImitariFormat[]): ImitariFile[] {
-  const result: ImitariFile[] = [];
-  for (const format of formats) {
-    result.push(getOu);
-  }
-}
-
 function isValidFileExtension(
   extensions: Set<string>,
   target: string,
@@ -109,14 +44,20 @@ function isValidFileExtension(
   return extensions.has(target);
 }
 
-async function getImageSource(imagePath: string): Promise<string> {
+async function getImageSource(
+  imagePath: string,
+  relativePath: string,
+): Promise<string> {
   // TODO add format variation
-  const imageData = await getImageDataFromFile(imagePath);
+  const imageData = await getImageData(imagePath);
   return `
-export const width = ${JSON.stringify(imageData.width)};
-export const height = ${JSON.stringify(imageData.height)};
-export { default as source } from ${JSON.stringify(imagePath)};
-  `;
+import source from ${JSON.stringify(relativePath)};
+export default {
+  width: ${JSON.stringify(imageData.width)},
+  height: ${JSON.stringify(imageData.height)},
+  source,
+};
+`;
 }
 
 function getImageTransformer(
@@ -127,51 +68,49 @@ function getImageTransformer(
   let imported = '';
   let exported = '';
 
-  for (let i = 0, len = sizes.length; i < len; i++) {
-    imported +=
-      'import variant' +
-      i +
-      ' from ' +
-      JSON.stringify(imagePath + '?imitari-variant-' + sizes[i]) +
-      ';\n';
-    exported += 'variant' + 'i' + ',';
+  for (const format of outputTypes) {
+    for (const size of sizes) {
+      const variantName = 'variant_' + format + '_' + size;
+      const importPath = JSON.stringify(
+        imagePath + '?imitari-' + format + '-' + size,
+      );
+      imported += 'import ' + variantName + ' from ' + importPath + ';\n';
+      exported += variantName + ',';
+    }
   }
 
   return (
     imported +
     'const variants = [' +
     exported +
-    '];' +
+    '];\n' +
     'export default { transform() { return variants; }};'
   );
 }
 
 function getImageVariant(
   imagePath: string,
-  file: ImitariFile,
-  variant: number,
+  target: ImitariFormat,
+  size: number,
 ): string {
-  // TODO add format variation
-  return `import source from ${JSON.stringify(imagePath + '?imitari-image-' + variant)};
+  return `import source from ${JSON.stringify(imagePath + '?imitari-raw-' + target + '-' + size)};
 export default {
-  width: ${variant},
-  type: '${getMIMEFromFormat(getFormatFromFile(file))}',
+  width: ${size},
+  type: '${getMIMEFromFormat(target)}',
   path: source,
 };`;
 }
 
-const LOCAL_PATH =
-  /\?imitari(-(source|transformer|(variant-[0-9]+)|(image-[0-9]+)))?/;
-const REMOTE_PATH = /^imitari\:/;
-const VARIANT_MATCHER = /imitari-variant-[0-9]+/;
+function getImageEntryPoint(imagePath: string): string {
+  return `import src from ${JSON.stringify(imagePath + '?imitari-source')};
+import transformer from ${JSON.stringify(imagePath + '?imitari-transformer')};
 
-function getVariantSize(condition: string): number | undefined {
-  const results = condition.match(VARIANT_MATCHER);
-  if (results) {
-    const item = results[0];
-  }
-  return undefined;
+export default { src, transformer };
+`;
 }
+
+const LOCAL_PATH = /\?imitari(-[a-z]+(-[0-9]+)?)?/;
+// const REMOTE_PATH = /^imitari\:/;
 
 export const imitari = createUnplugin((options: ImitariOptions) => {
   const remotePlugin: UnpluginOptions = {
@@ -184,6 +123,7 @@ export const imitari = createUnplugin((options: ImitariOptions) => {
   const outputFormat = options.local.output ?? DEFAULT_OUTPUT;
   const quality = options.local.quality ?? DEFAULT_QUALITY;
   const sizes = options.local.sizes;
+  const publicPath = options.local.publicPath ?? '';
 
   const validInputFileExtensions = getValidFileExtensions(inputFormat);
 
@@ -201,31 +141,63 @@ export const imitari = createUnplugin((options: ImitariOptions) => {
           return null;
         }
         const { dir, name, ext } = path.parse(id);
-        const [actualExtension, condition] = ext.split('?');
+        const [actualExtension, condition] = ext.substring(1).split('?');
         // Check if extension is valid
         if (!isValidFileExtension(validInputFileExtensions, actualExtension)) {
           return null;
         }
-        const originalPath = `${dir}/${name}${actualExtension}`;
+        if (!condition) {
+          return null;
+        }
+        const originalPath = `${dir}/${name}.${actualExtension}`;
+        const relativePath = `./${name}.${actualExtension}`;
         // Get the true source
         if (condition.startsWith('imitari-source')) {
-          return await getImageSource(originalPath);
+          return await getImageSource(originalPath, relativePath);
         }
-        // Gets the transformer
+        // Get the transformer file
         if (condition.startsWith('imitari-transformer')) {
-          return getImageTransformer(originalPath, sizes);
+          return getImageTransformer(relativePath, outputFormat, sizes);
         }
-        if (condition.startsWith('imitari-variant-')) {
-          const size = getVariantSize(condition);
-          if (size) {
-            return getImageVariant(originalPath, actualExtension, size);
-          }
-          throw new Error('Unexpected size');
+        // Image transformer variant
+        if (condition.startsWith('imitari-raw')) {
+          const [, , format, size] = condition.split('-');
+          const hash = xxHash32(originalPath).toString(16);
+          const filename = `imitari-${hash}-${format}-${size}.${getOutputFileFromFormat(format as ImitariFormat)}`;
+          const image = transformImage(
+            originalPath,
+            format as ImitariFormat,
+            +size,
+            quality,
+          );
+          const buffer = await image.toBuffer();
+          this.emitFile({
+            type: 'asset',
+            fileName: path.join(publicPath, filename),
+            source: buffer,
+          });
+          return `export default "${publicPath}${filename}"`;
+        }
+        // Image transformer variant
+        if (condition.startsWith('imitari-')) {
+          const [, format, size] = condition.split('-');
+
+          return getImageVariant(relativePath, format as ImitariFormat, +size);
         }
         if (condition.startsWith('imitari')) {
+          return getImageEntryPoint(relativePath);
         }
         return null;
       },
+      // async writeBundle() {
+      //   await Promise.all(
+      //     Array.from(inputs.entries()).map(async ([target, data]) => {
+
+      //       // TODO Output directory
+      //       await fs.writeFile(path.join(outputPath, target), buffer);
+      //     }),
+      //   );
+      // },
       vite: {
         enforce: 'pre',
       },

@@ -30,6 +30,9 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.8.3
+      unplugin-imitari:
+        specifier: workspace:*
+        version: link:../../packages/unplugin
       vite:
         specifier: ^6.3.5
         version: 6.3.5(@types/node@22.14.1)(yaml@2.7.1)

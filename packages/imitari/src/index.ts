@@ -6,17 +6,15 @@ export {
   getOutputFileFromFormat,
 } from './constants';
 export type {
-  ImitariAPNG,
   ImitariAVIF,
   ImitariFile,
   ImitariFormat,
-  ImitariGIF,
   ImitariImageSource,
   ImitariImageVariant,
   ImitariJPEG,
   ImitariMIME,
   ImitariPNG,
-  ImitariSVG,
+  ImitariTIFF,
   ImitariTransformer,
   ImitariWebP,
 } from './types';

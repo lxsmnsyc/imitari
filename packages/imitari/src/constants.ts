@@ -1,13 +1,11 @@
 import type { ImitariFile, ImitariFormat, ImitariMIME } from './types';
 
 const MIME_TO_FORMAT: Record<ImitariMIME, ImitariFormat> = {
-  'image/apng': 'apng',
   'image/avif': 'avif',
-  'image/gif': 'gif',
   'image/jpeg': 'jpeg',
   'image/png': 'png',
-  'image/svg+xml': 'svg',
   'image/webp': 'webp',
+  'image/tiff': 'tiff',
 };
 
 export function getFormatFromMIME(mime: ImitariMIME): ImitariFormat {
@@ -15,13 +13,11 @@ export function getFormatFromMIME(mime: ImitariMIME): ImitariFormat {
 }
 
 const FORMAT_TO_MIME: Record<ImitariFormat, ImitariMIME> = {
-  apng: 'image/apng',
   avif: 'image/avif',
-  gif: 'image/gif',
   jpeg: 'image/jpeg',
   png: 'image/png',
-  svg: 'image/svg+xml',
   webp: 'image/webp',
+  tiff: 'image/tiff',
 };
 
 export function getMIMEFromFormat(format: ImitariFormat): ImitariMIME {
@@ -29,17 +25,16 @@ export function getMIMEFromFormat(format: ImitariFormat): ImitariMIME {
 }
 
 const FILE_TO_FORMAT: Record<ImitariFile, ImitariFormat> = {
-  apng: 'apng',
   avif: 'avif',
-  gif: 'gif',
   jfif: 'jpeg',
   jpeg: 'jpeg',
   jpg: 'jpeg',
   pjp: 'jpeg',
   pjpeg: 'jpeg',
   png: 'png',
-  svg: 'svg',
   webp: 'webp',
+  tif: 'tiff',
+  tiff: 'tiff',
 };
 
 export function getFormatFromFile(file: ImitariFile): ImitariFormat {
@@ -47,13 +42,11 @@ export function getFormatFromFile(file: ImitariFile): ImitariFormat {
 }
 
 const FORMAT_TO_FILES: Record<ImitariFormat, ImitariFile[]> = {
-  apng: ['apng', 'png'],
   avif: ['avif'],
-  gif: ['gif'],
   jpeg: ['jfif', 'jpeg', 'jpg', 'pjp', 'pjpeg'],
   png: ['png'],
-  svg: ['svg'],
   webp: ['webp'],
+  tiff: ['tif', 'tiff'],
 };
 
 export function getFilesFromFormat(format: ImitariFormat): ImitariFile[] {
@@ -61,13 +54,11 @@ export function getFilesFromFormat(format: ImitariFormat): ImitariFile[] {
 }
 
 const FORMAT_TO_OUTPUT: Record<ImitariFormat, ImitariFile> = {
-  apng: 'apng',
   avif: 'avif',
-  gif: 'gif',
   jpeg: 'jpg',
   png: 'png',
-  svg: 'svg',
   webp: 'webp',
+  tiff: 'tiff'
 };
 
 export function getOutputFileFromFormat(format: ImitariFormat): ImitariFile {
