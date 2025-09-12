@@ -1,6 +1,7 @@
 import { Imitari } from 'solid-imitari';
 import { type JSX, Show, onMount } from 'solid-js';
-import exampleImage from './example.jpg?imitari';
+// import exampleImage from './example.jpg?imitari';
+import exampleImage from 'imitari:foobar';
 
 interface PlaceholderProps {
   show: () => void;

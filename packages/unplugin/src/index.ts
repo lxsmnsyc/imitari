@@ -14,6 +14,8 @@ const DEFAULT_INPUT: ImitariFormat[] = ['png', 'jpeg', 'webp'];
 const DEFAULT_OUTPUT: ImitariFormat[] = ['png', 'jpeg', 'webp'];
 const DEFAULT_QUALITY = 0.8;
 
+type MaybePromise<T> = T | Promise<T>;
+
 export interface ImitariOptions {
   local?: {
     sizes: number[];
@@ -23,7 +25,14 @@ export interface ImitariOptions {
     publicPath?: string;
   };
   remote?: {
-    transformURL(url: string): ImitariImageVariant | ImitariImageVariant[];
+    transformURL(url: string): MaybePromise<{
+      src: {
+        source: string;
+        width: number;
+        height: number;
+      };
+      variants: ImitariImageVariant | ImitariImageVariant[];
+    }>;
   };
 }
 
@@ -110,25 +119,53 @@ export default { src, transformer };
 }
 
 const LOCAL_PATH = /\?imitari(-[a-z]+(-[0-9]+)?)?/;
-// const REMOTE_PATH = /^imitari\:/;
+const REMOTE_PATH = 'imitari:';
 
 export const imitari = createUnplugin((options: ImitariOptions) => {
-  const remotePlugin: UnpluginOptions = {
-    name: 'imitari/remote',
-  };
-  if (!options.local) {
-    return remotePlugin;
+  const plugins: UnpluginOptions[] = [];
+  if (options.remote) {
+    const transformUrl = options.remote.transformURL;
+    plugins.push({
+      name: 'imitari/remote',
+      resolveId(id) {
+        if (id.startsWith(REMOTE_PATH)) {
+          return id;
+        }
+        return null;
+      },
+      async load(id) {
+        if (id.startsWith(REMOTE_PATH)) {
+          const param = id.substring(REMOTE_PATH.length);
+
+          const result = await transformUrl(param);
+
+          return `const VARIANTS = ${JSON.stringify(result.variants)};
+export default {
+  src: ${JSON.stringify(result.src)},
+  transformer: {
+    transform() {
+      return VARIANTS;
+    },
+  },
+};`;
+        }
+        return null;
+      },
+      vite: {
+        enforce: 'pre',
+      },
+    });
   }
-  const inputFormat = options.local.input ?? DEFAULT_INPUT;
-  const outputFormat = options.local.output ?? DEFAULT_OUTPUT;
-  const quality = options.local.quality ?? DEFAULT_QUALITY;
-  const sizes = options.local.sizes;
-  const publicPath = options.local.publicPath ?? 'dist';
+  if (options.local) {
+    const inputFormat = options.local.input ?? DEFAULT_INPUT;
+    const outputFormat = options.local.output ?? DEFAULT_OUTPUT;
+    const quality = options.local.quality ?? DEFAULT_QUALITY;
+    const sizes = options.local.sizes;
+    const publicPath = options.local.publicPath ?? 'dist';
 
-  const validInputFileExtensions = getValidFileExtensions(inputFormat);
+    const validInputFileExtensions = getValidFileExtensions(inputFormat);
 
-  return [
-    {
+    plugins.push({
       name: 'imitari/local',
       resolveId(id, importer) {
         if (LOCAL_PATH.test(id) && importer) {
@@ -187,18 +224,11 @@ export const imitari = createUnplugin((options: ImitariOptions) => {
         }
         return null;
       },
-      // async writeBundle() {
-      //   await Promise.all(
-      //     Array.from(inputs.entries()).map(async ([target, data]) => {
-
-      //       // TODO Output directory
-      //       await fs.writeFile(path.join(outputPath, target), buffer);
-      //     }),
-      //   );
-      // },
       vite: {
         enforce: 'pre',
       },
-    },
-  ];
+    });
+  }
+
+  return plugins;
 });
