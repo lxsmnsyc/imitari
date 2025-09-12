@@ -6,6 +6,7 @@ import {
 } from 'imitari';
 import path from 'node:path';
 import { type UnpluginOptions, createUnplugin } from 'unplugin';
+import { outputFile } from './fs';
 import { getImageData, transformImage } from './transformers';
 import xxHash32 from './xxhash';
 
@@ -20,7 +21,6 @@ export interface ImitariOptions {
     output?: ImitariFormat[];
     quality: number;
     publicPath?: string;
-    outputPath: string;
   };
   remote?: {
     transformURL(url: string): ImitariImageVariant | ImitariImageVariant[];
@@ -123,7 +123,7 @@ export const imitari = createUnplugin((options: ImitariOptions) => {
   const outputFormat = options.local.output ?? DEFAULT_OUTPUT;
   const quality = options.local.quality ?? DEFAULT_QUALITY;
   const sizes = options.local.sizes;
-  const publicPath = options.local.publicPath ?? '';
+  const publicPath = options.local.publicPath ?? 'dist';
 
   const validInputFileExtensions = getValidFileExtensions(inputFormat);
 
@@ -163,7 +163,7 @@ export const imitari = createUnplugin((options: ImitariOptions) => {
         if (condition.startsWith('imitari-raw')) {
           const [, , format, size] = condition.split('-');
           const hash = xxHash32(originalPath).toString(16);
-          const filename = `imitari-${hash}-${format}-${size}.${getOutputFileFromFormat(format as ImitariFormat)}`;
+          const filename = `imitari-${hash}-${size}.${getOutputFileFromFormat(format as ImitariFormat)}`;
           const image = transformImage(
             originalPath,
             format as ImitariFormat,
@@ -171,12 +171,10 @@ export const imitari = createUnplugin((options: ImitariOptions) => {
             quality,
           );
           const buffer = await image.toBuffer();
-          this.emitFile({
-            type: 'asset',
-            fileName: path.join(publicPath, filename),
-            source: buffer,
-          });
-          return `export default "${publicPath}${filename}"`;
+          const basePath = path.join('.imitari', filename);
+          const targetPath = path.join(publicPath, basePath);
+          await outputFile(targetPath, buffer);
+          return `export default "/${basePath}"`;
         }
         // Image transformer variant
         if (condition.startsWith('imitari-')) {

@@ -11,8 +11,7 @@ export default defineConfig({
       local: {
         sizes: [480, 600],
         quality: 80,
-        publicPath: 'public/',
-        outputPath: import.meta.dirname + 'build/images/',
+        publicPath: 'public',
       },
     }),
   ],
