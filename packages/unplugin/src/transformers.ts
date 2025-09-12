@@ -14,11 +14,11 @@ export function transformImage(
         quality,
       });
     case 'jpeg':
-      return input.resize(size).avif({
+      return input.resize(size).jpeg({
         quality,
       });
     case 'png':
-      return input.resize(size).avif({
+      return input.resize(size).png({
         quality,
       });
     case 'webp':
