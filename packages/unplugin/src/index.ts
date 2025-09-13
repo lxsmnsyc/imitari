@@ -200,7 +200,7 @@ export default {
         if (condition.startsWith('imitari-raw')) {
           const [, , format, size] = condition.split('-');
           const hash = xxHash32(originalPath).toString(16);
-          const filename = `imitari-${hash}-${size}.${getOutputFileFromFormat(format as ImitariFormat)}`;
+          const filename = `i-${hash}-${size}.${getOutputFileFromFormat(format as ImitariFormat)}`;
           const image = transformImage(
             originalPath,
             format as ImitariFormat,
